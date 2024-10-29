@@ -7,7 +7,7 @@ import {Button, Heading, Icon, List, LoadingIndicator, Modal, NoValueLabel, Tab,
 import {UseInfiniteQueryResult} from '@tanstack/react-query';
 
 import {type GetFollowersForProfileResponse, type GetFollowingForProfileResponse} from '../../api/activitypub';
-import {useFollowersForProfile, useFollowingForProfile, useProfileForUser} from '../../hooks/useActivityPubQueries';
+import {useFollowersForProfile, useFollowingForProfile, useProfileForUser, usePostsForProfile} from '../../hooks/useActivityPubQueries';
 
 import APAvatar from '../global/APAvatar';
 import ActivityItem from '../activities/ActivityItem';
@@ -136,6 +136,83 @@ const FollowingTab: React.FC<{handle: string}> = ({handle}) => {
     );
 };
 
+const PostsTab: React.FC<{handle: string}> = ({handle}) => {
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        isLoading
+    } = usePostsForProfile(handle);
+
+    const posts = (data?.pages.flatMap(page => page.posts) ?? []);
+
+    // Intersection observer to fetch more data when the user scrolls
+    // to the bottom of the list
+    const observerRef = useRef<IntersectionObserver | null>(null);
+    const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        if (observerRef.current) {
+            observerRef.current.disconnect();
+        }
+
+        observerRef.current = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+                fetchNextPage();
+            }
+        });
+
+        if (loadMoreRef.current) {
+            observerRef.current.observe(loadMoreRef.current);
+        }
+
+        return () => {
+            if (observerRef.current) {
+                observerRef.current.disconnect();
+            }
+        };
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+    return (
+        <div>
+            {
+                posts.length === 0 && !isLoading ? (
+                    <NoValueLabel icon='user-edit'>
+                        {`${handle} has no posts yet`}
+                    </NoValueLabel>
+                ) : (
+                    <>
+                        {posts.map((post, index) => (
+                            <div>
+                                <FeedItem
+                                    actor={post.actor}
+                                    comments={post.object.replies}
+                                    layout='feed'
+                                    object={post.object}
+                                    type={post.type}
+                                    onCommentClick={() => {}}
+                                />
+                                {index < posts.length - 1 && (
+                                    <div className="h-px w-full bg-grey-200"></div>
+                                )}
+                            </div>
+                        ))}
+                    </>
+                )
+            }
+            <div ref={loadMoreRef} className='h-1'></div>
+            {
+                (isFetchingNextPage || isLoading) && (
+                    <div className='mt-6 flex flex-col items-center justify-center space-y-4 text-center'>
+                        <LoadingIndicator size='md' />
+                    </div>
+                )
+            }
+        </div>
+    );
+};
+
 interface ViewProfileModalProps {
     profile: {
         actor: ActorProperties;
@@ -168,30 +245,13 @@ const ViewProfileModal: React.FC<ViewProfileModalProps> = ({
     }
 
     const attachments = (profile?.actor.attachment || []);
-    const posts = (profile?.posts || []).filter(post => post.type !== 'Announce');
 
     const tabs = isLoading === false && typeof profile !== 'string' && profile ? [
         {
             id: 'posts',
             title: 'Posts',
             contents: (
-                <div>
-                    {posts.map((post, index) => (
-                        <div>
-                            <FeedItem
-                                actor={profile.actor}
-                                comments={post.object.replies}
-                                layout='feed'
-                                object={post.object}
-                                type={post.type}
-                                onCommentClick={() => {}}
-                            />
-                            {index < posts.length - 1 && (
-                                <div className="h-px w-full bg-grey-200"></div>
-                            )}
-                        </div>
-                    ))}
-                </div>
+                <PostsTab handle={profile.handle} />
             )
         },
         {

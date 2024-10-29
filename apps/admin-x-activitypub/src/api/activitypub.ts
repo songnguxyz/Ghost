@@ -9,7 +9,6 @@ export interface Profile {
     followerCount: number;
     followingCount: number;
     isFollowing: boolean;
-    posts: Activity[];
 }
 
 export interface SearchResults {
@@ -29,6 +28,11 @@ export interface GetFollowingForProfileResponse {
         actor: Actor;
         isFollowing: boolean;
     }[];
+    next: string | null;
+}
+
+export interface GetPostsForProfileResponse {
+    posts: Activity[];
     next: string | null;
 }
 
@@ -288,6 +292,37 @@ export class ActivityPubAPI {
         };
     }
 
+    async getPostsForProfile(handle: string, next?: string): Promise<GetPostsForProfileResponse> {
+        const url = new URL(`.ghost/activitypub/profile/${handle}/posts`, this.apiUrl);
+        if (next) {
+            url.searchParams.set('next', next);
+        }
+
+        const json = await this.fetchJSON(url);
+
+        if (json === null) {
+            return {
+                posts: [],
+                next: null
+            };
+        }
+
+        if (!('posts' in json)) {
+            return {
+                posts: [],
+                next: null
+            };
+        }
+
+        const posts = Array.isArray(json.posts) ? json.posts : [];
+        const nextPage = 'next' in json && typeof json.next === 'string' ? json.next : null;
+
+        return {
+            posts,
+            next: nextPage
+        };
+    }
+
     async follow(username: string): Promise<void> {
         const url = new URL(`.ghost/activitypub/actions/follow/${username}`, this.apiUrl);
         await this.fetchJSON(url, 'POST');
@@ -508,5 +543,43 @@ export class ActivityPubAPI {
         const url = new URL(`.ghost/activitypub/profile/${handle}`, this.apiUrl);
         const json = await this.fetchJSON(url);
         return json as Profile;
+    }
+
+    async getAllPosts(handle: string): Promise<Activity[]> {
+        const fetchPosts = async (url: URL): Promise<Activity[]> => {
+            const json = await this.fetchJSON(url);
+
+            // If the response is null, return early
+            if (json === null) {
+                return [];
+            }
+
+            // If the response doesn't have a posts array, return early
+            if (!('posts' in json)) {
+                return [];
+            }
+
+            // If the response has an items property, but it's not an array
+            // use an empty array
+            const items = Array.isArray(json.posts) ? json.posts : [];
+
+            // If the response has a next property, fetch the next page
+            // recursively and concatenate the results
+            if ('next' in json && typeof json.next === 'string') {
+                const nextUrl = new URL(url);
+
+                nextUrl.searchParams.set('next', json.next);
+
+                const nextItems = await fetchPosts(nextUrl);
+
+                return items.concat(nextItems);
+            }
+
+            return items;
+        };
+
+        const url = new URL(`.ghost/activitypub/profile/${handle}/posts`, this.apiUrl);
+
+        return fetchPosts(url);
     }
 }

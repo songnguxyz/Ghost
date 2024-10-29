@@ -17,6 +17,7 @@ import {
     useFollowingForUser,
     useLikedForUser,
     useOutboxForUser,
+    usePostsForUser,
     useUserDataForUser
 } from '../hooks/useActivityPubQueries';
 
@@ -28,7 +29,7 @@ const Profile: React.FC<ProfileProps> = ({}) => {
     const {data: following = []} = useFollowingForUser('index');
     const {data: followers = []} = useFollowersForUser('index');
     const {data: liked = []} = useLikedForUser('index');
-    const {data: posts = []} = useOutboxForUser('index');
+    const {data: posts = []} = usePostsForUser('index');
 
     // Replace 'index' with the actual handle of the user
     const {data: userProfile} = useUserDataForUser('index') as {data: ActorProperties | null};

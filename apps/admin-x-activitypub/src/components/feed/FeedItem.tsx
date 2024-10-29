@@ -470,8 +470,8 @@ const FeedItem: React.FC<FeedItemProps> = ({actor, object, layout, type, comment
                             <Heading className='line-clamp-1 font-semibold leading-normal' level={5} data-test-activity-heading>
                                 {object.name ? object.name : (
                                     <span dangerouslySetInnerHTML={{
-                                        __html: object.content.length > 30 
-                                            ? stripHtml(object.content).substring(0, 50) + '...' 
+                                        __html: object.content.length > 30
+                                            ? stripHtml(object.content).substring(0, 50) + '...'
                                             : stripHtml(object.content)
                                     }}></span>
                                 )}
