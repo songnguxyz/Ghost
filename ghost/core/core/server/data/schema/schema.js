@@ -880,6 +880,9 @@ module.exports = {
         member_uuid: {type: 'string', maxlength: 36, nullable: false},
         member_email: {type: 'string', maxlength: 191, nullable: false},
         member_name: {type: 'string', maxlength: 191, nullable: true},
+        delivered_at_set_dttm: {type: 'dateTime', nullable: true},
+        opened_at_set_dttm: {type: 'dateTime', nullable: true},
+        failed_at_set_dttm: {type: 'dateTime', nullable: true},
         '@@INDEXES@@': [
             ['email_id', 'member_email'],
             ['email_id', 'delivered_at'],

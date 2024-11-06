@@ -21,7 +21,8 @@ class EmailEventStorage {
             .where('id', '=', event.emailRecipientId)
             .whereNull('delivered_at')
             .update({
-                delivered_at: moment.utc(event.timestamp).format('YYYY-MM-DD HH:mm:ss')
+                delivered_at: moment.utc(event.timestamp).format('YYYY-MM-DD HH:mm:ss'),
+                delivered_at_set_dttm: moment.utc().format('YYYY-MM-DD HH:mm:ss')
             });
     }
 
@@ -32,7 +33,8 @@ class EmailEventStorage {
             .where('id', '=', event.emailRecipientId)
             .whereNull('opened_at')
             .update({
-                opened_at: moment.utc(event.timestamp).format('YYYY-MM-DD HH:mm:ss')
+                opened_at: moment.utc(event.timestamp).format('YYYY-MM-DD HH:mm:ss'),
+                opened_at_set_dttm: moment.utc().format('YYYY-MM-DD HH:mm:ss')
             });
     }
 
@@ -43,7 +45,8 @@ class EmailEventStorage {
             .where('id', '=', event.emailRecipientId)
             .whereNull('failed_at')
             .update({
-                failed_at: moment.utc(event.timestamp).format('YYYY-MM-DD HH:mm:ss')
+                failed_at: moment.utc(event.timestamp).format('YYYY-MM-DD HH:mm:ss'),
+                failed_at_set_dttm: moment.utc().format('YYYY-MM-DD HH:mm:ss')
             });
         await this.saveFailure('permanent', event);
     }

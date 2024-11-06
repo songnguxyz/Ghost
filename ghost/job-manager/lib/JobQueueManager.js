@@ -54,11 +54,12 @@ class JobQueueManager {
 
     createWorkerPool() {
         const poolOptions = {
-            workerType: 'thread',
-            workerTerminateTimeout: 10000
         };
         if (this.config.maxWorkers) {
             poolOptions.maxWorkers = this.config.maxWorkers;
+        }
+        if (this.config.minWorkers) {
+            poolOptions.minWorkers = this.config.minWorkers;
         }
         return this.WorkerPool.pool(path.join(__dirname, '/workers/generic-worker.js'), poolOptions);
     }
