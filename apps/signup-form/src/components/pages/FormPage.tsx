@@ -21,8 +21,7 @@ export const FormPage: React.FC = () => {
         setLoading(true);
 
         try {
-            const integrityToken = await api.getIntegrityToken();
-            await api.sendMagicLink({email, labels: options.labels, integrityToken});
+            await api.sendMagicLink({email, labels: options.labels});
 
             if (minimal) {
                 // Don't go to the success page, but show the success state in the form

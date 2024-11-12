@@ -45,13 +45,6 @@ const Preview: React.FC<SignupFormOptions & {
                 }
 
                 return;
-            },
-            getIntegrityToken: async () => {
-                await new Promise((resolve) => {
-                    setTimeout(resolve, 500);
-                });
-
-                return 'testtoken';
             }
         },
         t: i18n.t,
