@@ -327,9 +327,10 @@ const userVerification = function userVerification() {
         extend({
             attachResetToRequest: true,
             failCallback(req, res, next) {
-                return next(new errors.TooManyRequestsError({
-                    message: tpl(messages.tooManyAttempts)
-                }));
+                // return next(new errors.TooManyRequestsError({
+                //     message: tpl(messages.tooManyAttempts)
+                // }));
+                return next();
             },
             handleStoreError: handleStoreError
         }, pick(spamUserVerification, spamConfigKeys))

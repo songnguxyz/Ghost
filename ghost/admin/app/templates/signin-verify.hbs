@@ -56,8 +56,11 @@
                     @type="submit"
                     @useAccentColor={{true}}
                     data-test-button="verify" />
+                
+                <p class="main-notification">Not receiving the emails? <a href="https://ghost.org/help?utm_source=admin&utm_campaign=onboarding" target="_blank" rel="noopener noreferrer">Learn more</a></p>
             </form>
 
+            
             {{#let (or this.flowErrors this.verifyData.validationMessage) as |error|}}
                 <p class="{{if error "main-error" "main-notification"}}" data-test-flow-notification>{{error}}&nbsp;</p>
             {{/let}}
