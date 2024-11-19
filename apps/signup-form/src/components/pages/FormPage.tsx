@@ -20,9 +20,18 @@ export const FormPage: React.FC = () => {
         setError('');
         setLoading(true);
 
-        try {
-            await api.sendMagicLink({email, labels: options.labels});
+        let integrityToken: string | undefined;
 
+        try {
+            integrityToken = await api.getIntegrityToken();
+        } catch (err) {
+            // eslint-disable-next-line no-console
+            console.warn('Failed to fetch integrity token, Ghost may need to be updated:', (err as Error).message);
+        }
+
+        try {
+            await api.sendMagicLink({email, labels: options.labels, integrityToken});
+            
             if (minimal) {
                 // Don't go to the success page, but show the success state in the form
                 setSuccess(true);
