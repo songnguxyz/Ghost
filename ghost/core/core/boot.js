@@ -343,6 +343,7 @@ async function initServices() {
     const recommendationsService = require('./server/services/recommendations');
     const emailAddressService = require('./server/services/email-address');
     const statsService = require('./server/services/stats');
+    const explorePingService = require('./server/services/explore-ping');
 
     const urlUtils = require('./shared/url-utils');
 
@@ -389,7 +390,8 @@ async function initServices() {
         mailEvents.init(),
         donationService.init(),
         recommendationsService.init(),
-        statsService.init()
+        statsService.init(),
+        explorePingService.init()
     ]);
     debug('End: Services');
 
@@ -574,7 +576,7 @@ async function bootGhost({backend = true, frontend = true, server = true} = {}) 
         if (prometheusClient) {
             prometheusClient.instrumentKnex(connection);
         }
-        
+
         const {dataService} = await initServicesForFrontend({bootLogger});
 
         if (frontend) {
@@ -633,6 +635,8 @@ async function bootGhost({backend = true, frontend = true, server = true} = {}) 
         }
     } catch (error) {
         const errors = require('@tryghost/errors');
+
+        console.log('error', error);
 
         // Ensure the error we have is an ignition error
         let serverStartError = error;
