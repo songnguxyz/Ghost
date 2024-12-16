@@ -59,10 +59,10 @@ module.exports = class LinkClickRepository {
     async save(linkClick) {
         let member;
 
-        sentry.startSpan({name: 'Member.findOne'}, async () => {
+        const usingCache = config && config.get('linkClickTrackingCacheMemberUuid');
+        await sentry.startSpan({name: `Member.findOne > ${usingCache ? 'cache' : 'db'}`}, async () => {
             try {
-                console.log(`finding member`);
-                if (config && config.get('linkClickTrackingCacheMemberUuid')) {
+                if (usingCache) {
                     member = await this.memoizedFindOne(linkClick.member_uuid);
                 } else {
                     member = await this.#Member.findOne({uuid: linkClick.member_uuid});

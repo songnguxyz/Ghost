@@ -76,7 +76,8 @@ const ALLOWED_HTTP_TRANSACTIONS = [
     '/members/api', // any Members API call
     '/:slug', // any frontend post/page
     '/author', // any frontend author page
-    '/tag' // any frontend tag page
+    '/tag', // any frontend tag page
+    '/r' // redirect
 ].map((path) => {
     // Sentry names HTTP transactions like: "<HTTP_METHOD> <PATH>" i.e. "GET /ghost/api/content/settings"
     // Match any of the paths above with any HTTP method, and also the homepage "GET /"
@@ -88,10 +89,10 @@ const ALLOWED_HTTP_TRANSACTIONS = [
  * @returns {import('@sentry/node').Event | null}
  */
 const beforeSendTransaction = function (event) {
+    console.log(`event.transaction`, event.transaction);
     // Drop transactions that are not in the allowed list
     for (const transaction of ALLOWED_HTTP_TRANSACTIONS) {
         const match = event.transaction.match(transaction);
-
         if (match?.groups?.path) {
             return event;
         }
